@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 고객경험 문제정의 워크시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#101B33;
+    --ink-2:#1B2A4D;
+    --ink-3:#26375E;
+    --paper:#F7F2E6;
+    --paper-2:#FBF8F1;
+    --gold:#C9A227;
+    --gold-bright:#E6C158;
+    --teal:#3E7C7C;
+    --line: rgba(230,193,88,0.25);
+    --ink-text:#1A1A1A;
+    --muted:#6b6656;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper-2);
+    font-family:'Noto Sans KR', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:28px 20px 60px;}
+
+  header{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:22px 26px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:linear-gradient(180deg, var(--ink-2), var(--ink));
+    position:relative;
+    overflow:hidden;
+  }
+  header::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.18em;
+    color:var(--gold-bright);
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Noto Serif KR', serif;
+    font-weight:900;
+    font-size:clamp(22px, 3.2vw, 30px);
+    margin:2px 0 4px;
+    color:var(--paper-2);
+  }
+  .sub{
+    color:#C9CBD9;
+    font-size:14px;
+    line-height:1.65;
+  }
+  .chain-note{
+    margin-top:10px;
+    font-size:12.5px;
+    color:var(--gold-bright);
+    background:rgba(230,193,88,0.1);
+    border:1px solid rgba(230,193,88,0.3);
+    border-radius:3px;
+    padding:8px 12px;
+    line-height:1.6;
+  }
+
+  .kiosk{
+    margin-top:16px;
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .kiosk-cell{
+    background:var(--ink-2);
+    padding:14px 16px;
+  }
+  .kiosk-cell label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    color:var(--gold-bright);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  select, input[type=text]{
+    width:100%;
+    background:var(--ink);
+    border:1px solid rgba(230,193,88,0.35);
+    color:var(--paper-2);
+    padding:8px 10px;
+    border-radius:2px;
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13.5px;
+  }
+  .kiosk-cell textarea{
+    width:100%;
+    background:var(--ink);
+    border:1px solid rgba(230,193,88,0.35);
+    color:var(--paper-2);
+    padding:8px 10px;
+    border-radius:2px;
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13.5px;
+    min-height:56px;
+    resize:vertical;
+  }
+  .kiosk-persona{ margin-top:1px; }
+  select:focus, input:focus, textarea:focus, button:focus-visible{
+    outline:2px solid var(--gold-bright);
+    outline-offset:1px;
+  }
+
+  .progress-bar{
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:12px 16px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:#C9CBD9;
+  }
+  .progress-track{
+    flex:1;
+    height:6px;
+    background:rgba(255,255,255,0.08);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--gold-bright);
+    transition:width .25s ease;
+  }
+
+  .steps{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .step{
+    background:var(--paper);
+    border-radius:4px;
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .step-header{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px 18px;
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    text-align:left;
+    font-family:'Noto Sans KR', sans-serif;
+  }
+  .step-plate{
+    flex:0 0 auto;
+    width:30px; height:30px;
+    border-radius:2px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Serif KR', serif;
+    font-weight:900;
+    font-size:14px;
+    background:var(--ink);
+    color:var(--gold-bright);
+    border:1px solid var(--gold);
+  }
+  .step.done .step-plate{
+    background:var(--teal);
+    color:#fff;
+    border-color:var(--teal);
+  }
+  .step-title-wrap{ flex:1; }
+  .step-title{
+    font-weight:700;
+    font-size:15px;
+    color:var(--ink-text);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .time-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--teal);
+    background:rgba(62,124,124,0.1);
+    border:1px solid rgba(62,124,124,0.3);
+    padding:2px 7px;
+    border-radius:10px;
+  }
+  .optional-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--muted);
+    background:rgba(0,0,0,0.05);
+    border:1px solid rgba(0,0,0,0.12);
+    padding:2px 7px;
+    border-radius:10px;
+  }
+  .phase-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--gold);
+    padding:2px 0;
+  }
+  .step-desc{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-top:3px;
+  }
+  .chevron{
+    flex:0 0 auto;
+    font-size:14px;
+    color:var(--muted);
+    transition:transform .2s ease;
+  }
+  .step.open .chevron{ transform:rotate(180deg); }
+
+  .step-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .step.open .step-body{
+    max-height:1400px;
+  }
+  .step-body-inner{
+    padding:0 18px 18px;
+  }
+  .prompt-box{
+    background:var(--ink);
+    color:#EAE6D8;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13.5px;
+    line-height:1.85;
+    padding:18px 18px;
+    border-radius:4px;
+    white-space:pre-wrap;
+    border:1px solid rgba(230,193,88,0.3);
+  }
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .copy-btn{
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    font-weight:700;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:3px;
+    cursor:pointer;
+    font-family:'Noto Sans KR', sans-serif;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .copy-btn:hover{ background:var(--gold-bright); }
+  .copy-btn:active{ transform:scale(0.98); }
+  .copy-note{
+    font-size:12.5px;
+    color:var(--teal);
+    font-weight:700;
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  .copy-note.show{ opacity:1; }
+  .done-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    color:var(--muted);
+    cursor:pointer;
+    user-select:none;
+  }
+  .done-toggle input{ width:15px; height:15px; accent-color:var(--teal); }
+
+  .worksheet{
+    margin-top:16px;
+    border-top:1px dashed rgba(0,0,0,0.15);
+    padding-top:14px;
+  }
+  .worksheet-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-3);
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  textarea, .worksheet input[type=text]{
+    width:100%;
+    border:1px solid rgba(0,0,0,0.15);
+    border-radius:3px;
+    padding:10px 12px;
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13.5px;
+    resize:vertical;
+    background:#fff;
+    color:var(--ink-text);
+  }
+  textarea{ min-height:80px; }
+  .triple-field{ margin-bottom:8px; }
+  .triple-field label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+
+  footer{
+    margin-top:22px;
+    font-size:12px;
+    color:#8f93a8;
+    line-height:1.7;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Future &amp; Dream Academy · Shinsegae CX Workshop</div>
+    <h1>AI 고객경험 문제정의 워크시트</h1>
+    <div class="sub">AI를 활용해 고객경험을 분석하는 방법을 직접 익혀보는 시간입니다. 우리 팀 핵심 타겟 고객이 겪는 진짜 문제 3가지를 뽑아내는 것이 최종 목표예요.</div>
+    <div class="chain-note">💡 프롬프트는 <b>하나의 채팅창</b>에서 순서대로 이어서 입력하세요. 그리고 AI 답변을 그대로 두지 말고, 매 단계 아래 <b>빈칸에 우리 팀 언어로 정리</b>해보세요 — 그게 이 실습의 핵심입니다.</div>
+
+    <div class="kiosk">
+      <div class="kiosk-cell">
+        <label for="biz">담당 사업부</label>
+        <select id="biz"></select>
+      </div>
+      <div class="kiosk-cell">
+        <label for="subBiz">세부 사업부</label>
+        <select id="subBiz"></select>
+        <input type="text" id="subBizCustomInput" placeholder="세부 사업부를 직접 입력하세요" style="margin-top:8px; display:none;">
+      </div>
+    </div>
+
+    <div class="kiosk kiosk-persona">
+      <div class="kiosk-cell">
+        <label for="personaName">페르소나 이름</label>
+        <input type="text" id="personaName" placeholder="예: 김서연">
+      </div>
+      <div class="kiosk-cell">
+        <label for="personaAgeJob">나이 · 직업 · 한 줄 소개</label>
+        <input type="text" id="personaAgeJob" placeholder="예: 34세, 워킹맘, 주말에만 장보러 오는 맞벌이 직장인">
+      </div>
+    </div>
+
+    <div class="kiosk kiosk-persona">
+      <div class="kiosk-cell" style="grid-column: 1 / -1;">
+        <label for="personaDesc">핵심 특징 · 고민 (페르소나 포스터 내용 정리)</label>
+        <textarea id="personaDesc" placeholder="포스터에 정리한 페르소나의 성격, 상황, 고민, 니즈 등을 옮겨 적어주세요"></textarea>
+      </div>
+    </div>
+
+
+    <div class="progress-bar">
+      <span id="progressText">완료 0/9</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </header>
+
+  <div class="steps" id="steps"></div>
+
+  <footer>
+    이 프롬프트가 만든 페르소나·인터뷰·설문 결과는 참고용 가상 데이터입니다. 실제로 들은 인터뷰 내용이 있다면 반드시 함께 반영해서 최종 문제를 정의하세요.
+  </footer>
+</div>
+
+<script>
+const BIZ_LIST = ["이마트", "조선호텔앤리조트", "신세계푸드", "신세계아이앤씨"];
+
+const BIZ_SUBCATEGORIES = {
+  "이마트": [
+    "이마트 (대형마트)",
+    "트레이더스 홀세일클럽",
+    "스타필드마켓",
+    "노브랜드",
+    "일렉트로마트",
+    "이마트 에브리데이 (SSM)",
+    "이마트24 (편의점)",
+    "SSG.COM",
+    "스타필드"
+  ],
+  "조선호텔앤리조트": [
+    "웨스틴 조선",
+    "그랜드 조선",
+    "조선 팰리스",
+    "포포인츠 바이 쉐라톤 조선",
+    "레스케이프",
+    "그래비티 조선"
+  ],
+  "신세계푸드": [
+    "베이커리",
+    "노브랜드 버거",
+    "식자재유통 (B2B)",
+    "기타 외식 브랜드 (오슬로·베키아에누보·데블스도어)"
+  ],
+  "신세계아이앤씨": [
+    "스마트리테일 (AI 계산대·스파로스)",
+    "IT서비스 (SI·시스템 운영)",
+    "클라우드·AI 솔루션",
+    "데이터비즈니스"
+  ]
+};
+const SUB_BIZ_UNSET = "미정";
+const SUB_BIZ_CUSTOM = "__custom__";
+
+const STEPS = [
+  {
+    phase: "인터뷰 준비",
+    title: "인터뷰 질문 만들기",
+    desc: "이미 정의한 페르소나 정보를 AI에게 알려주고, 실제 인터뷰에 쓸 질문지를 번호와 질문 의도까지 포함해 받습니다.",
+    build: (s) => `당신은 15년 경력의 서비스 기획자입니다.
+[${s.biz}]의 고객경험을 개선하려고 합니다.
+
+저희 팀이 미리 정의한 페르소나는 다음과 같습니다.
+- 이름: ${s.personaName}
+- 나이·직업·소개: ${s.personaAgeJob}
+- 핵심 특징 및 고민: ${s.personaDesc}
+
+이 페르소나를 대상으로 30분 인터뷰를 진행하려고 합니다. 질문마다 번호와 질문 의도를 포함해서 표로 정리해 주세요.`,
+    worksheet: { type: "text", label: "📝 우리 팀이 가장 중요하다고 생각하는 질문 2~3개를 적어보세요." }
+  },
+  {
+    phase: "인터뷰 결과 분석",
+    minutes: 10,
+    title: "가상 인터뷰 답변 만들기",
+    desc: "실제 인터뷰 전에, 페르소나라면 어떻게 답할지 AI로 먼저 예상해봅니다.",
+    build: () => `위 페르소나가 이 질문에 답할 것으로 예상되는 답변을 표로 정리해 주세요. 답변은 페르소나의 특징을 잘 담고 있어야 하며, 매우 사실적인 느낌이 들어야 합니다.`,
+    worksheet: { type: "text", label: "📝 가상 답변 중 가장 인상 깊었던 답변 한 가지를 요약해보세요." }
+  },
+  {
+    phase: "인터뷰 결과 분석",
+    minutes: 10,
+    optional: true,
+    title: "실제 인터뷰와 비교하기",
+    desc: "실제로 들은 인터뷰 내용이 있다면 붙여넣고 비교해봅니다. 없다면 건너뛰어도 됩니다.",
+    build: () => `아래는 저희 팀이 실제로 진행한 인터뷰 내용입니다. 방금 만든 가상 답변과 비교했을 때 공통점과 차이점을 짚어 주세요.
+
+[여기에 실제 인터뷰 메모를 붙여넣으세요]`,
+    worksheet: { type: "text", label: "📝 가상 답변과 실제 답변의 가장 큰 차이는 무엇이었나요?" }
+  },
+  {
+    phase: "인터뷰 결과 분석",
+    minutes: 10,
+    title: "관심사 · Pain-point 키워드 도출",
+    desc: "지금까지의 인터뷰 내용을 관심사와 페인포인트 키워드로 압축합니다.",
+    build: (s) => `지금까지의 인터뷰 내용을 바탕으로 ${s.personaLabel}의 관심사와 Pain-point 핵심 키워드를 각각 5개씩 도출해 주세요.`,
+    worksheet: { type: "text", label: "📝 우리 팀이 뽑은 Pain-point 키워드 5개를 적어보세요." }
+  },
+  {
+    phase: "설문 설계",
+    minutes: 10,
+    title: "설문 문항 만들기",
+    desc: "인터뷰에서 확인한 내용을 더 많은 사람에게 검증하기 위한 설문 문항을 뽑습니다.",
+    build: (s) => `${s.personaLabel}과(와) 비슷한 특징을 가진 사람들을 대상으로 설문조사를 하려고 합니다. 지금까지의 인터뷰 결과를 바탕으로 설문 문항을 20개 이내로 만들어 주세요.`,
+    worksheet: { type: "text", label: "📝 설문에 꼭 포함하고 싶은 질문 1~2개를 적어보세요." }
+  },
+  {
+    phase: "설문 설계",
+    minutes: 5,
+    title: "설문 대상 집단 추천받기",
+    desc: "100명 규모 설문을 어떤 집단에게 돌리면 좋을지, 그 이유까지 함께 받아봅니다.",
+    build: () => `100명을 대상으로 설문을 진행하려고 합니다. 어떤 집단을 대상으로 조사하면 좋을지 추천해 주시고, 왜 이 집단에 주목해야 하는지 이유도 알려주세요.`,
+    worksheet: { type: "text", label: "📝 추천받은 집단 중 우리 팀이 선택한 집단과 이유를 적어보세요." }
+  },
+  {
+    phase: "설문 결과 & 문제정의",
+    minutes: 10,
+    title: "가상 설문 결과 만들기",
+    desc: "추천받은 집단들을 대상으로 설문을 돌렸다고 가정하고, 분석 연습용 가상 데이터를 만듭니다.",
+    build: () => `100명을 대상으로 방금 추천받은 집단들에 동일한 비율로 설문을 진행했다고 가정하고, 설문 결과를 가상으로 만들어 주세요.
+매우 사실적인 느낌이 들어야 하며, 데이터 분석이 가능하도록 하나의 표로 정리해 주세요.`,
+    worksheet: { type: "text", label: "📝 설문 결과에서 눈에 띄는 수치나 패턴이 있었나요?" }
+  },
+  {
+    phase: "설문 결과 & 문제정의",
+    minutes: 10,
+    title: "집단별 Pain-point 도출",
+    desc: "인터뷰와 설문 결과를 종합해 집단별 핵심 페인포인트를 정리합니다.",
+    build: () => `설문 응답 내용을 바탕으로 각 집단의 핵심 Pain-point를 5개씩 도출해 주세요.`,
+    worksheet: { type: "text", label: "📝 인터뷰와 설문 결과 모두에서 공통적으로 나타난 Pain-point는 무엇인가요?" }
+  },
+  {
+    phase: "설문 결과 & 문제정의",
+    minutes: 15,
+    title: "최종 문제 3가지 정의하기",
+    desc: "지금까지의 모든 결과를 종합해서, 오늘의 최종 결과물인 문제정의 3가지를 완성합니다.",
+    build: (s) => `지금까지 정리한 페르소나, 인터뷰 결과, 설문 결과, Pain-point 키워드를 모두 종합해서 ${s.personaLabel}이(가) 겪는 핵심 문제를 3가지의 문제정의(Problem Statement)로 작성해 주세요.
+각 문제는 "누가, 어떤 상황에서, 어떤 어려움을 겪고 있는지"가 드러나야 하고, 왜 이 문제가 중요한지 한 줄 근거도 함께 적어 주세요.`,
+    worksheet: { type: "triple", label: "📝 우리 팀이 최종적으로 뽑은 문제 3가지를 정리해보세요.", fields: ["문제 1", "문제 2", "문제 3"] }
+  }
+];
+
+let state = {
+  biz: BIZ_LIST[0],
+  subBiz: BIZ_SUBCATEGORIES[BIZ_LIST[0]][0],
+  subBizCustom: "",
+  personaName: "",
+  personaAgeJob: "",
+  personaDesc: "",
+  openIndex: 0,
+  done: new Array(STEPS.length).fill(false)
+};
+
+const bizSelect = document.getElementById('biz');
+const subBizSelect = document.getElementById('subBiz');
+const subBizCustomInput = document.getElementById('subBizCustomInput');
+const personaNameInput = document.getElementById('personaName');
+const personaAgeJobInput = document.getElementById('personaAgeJob');
+const personaDescInput = document.getElementById('personaDesc');
+
+function fillBizOptions(){
+  bizSelect.innerHTML = BIZ_LIST.map(b => `<option value="${b}">${b}</option>`).join('');
+  bizSelect.value = state.biz;
+  fillSubBizOptions();
+}
+
+function fillSubBizOptions(){
+  const subs = BIZ_SUBCATEGORIES[state.biz] || [];
+  subBizSelect.innerHTML = subs.map(s => `<option value="${s}">${s}</option>`).join('')
+    + `<option value="${SUB_BIZ_UNSET}">${SUB_BIZ_UNSET}</option>`
+    + `<option value="${SUB_BIZ_CUSTOM}">직접 입력</option>`;
+  subBizSelect.value = state.subBiz;
+  subBizCustomInput.style.display = (state.subBiz === SUB_BIZ_CUSTOM) ? 'block' : 'none';
+}
+
+bizSelect.addEventListener('change', () => {
+  state.biz = bizSelect.value;
+  state.subBiz = BIZ_SUBCATEGORIES[state.biz][0];
+  fillSubBizOptions();
+  render();
+});
+subBizSelect.addEventListener('change', () => {
+  state.subBiz = subBizSelect.value;
+  subBizCustomInput.style.display = (state.subBiz === SUB_BIZ_CUSTOM) ? 'block' : 'none';
+  if(state.subBiz === SUB_BIZ_CUSTOM){
+    subBizCustomInput.focus();
+  }
+  render();
+});
+subBizCustomInput.addEventListener('input', () => {
+  state.subBizCustom = subBizCustomInput.value;
+  render();
+});
+personaNameInput.addEventListener('input', () => {
+  state.personaName = personaNameInput.value;
+  render();
+});
+personaAgeJobInput.addEventListener('input', () => {
+  state.personaAgeJob = personaAgeJobInput.value;
+  render();
+});
+personaDescInput.addEventListener('input', () => {
+  state.personaDesc = personaDescInput.value;
+  render();
+});
+
+function personaFields(){
+  let bizContext = state.biz;
+  if(state.subBiz === SUB_BIZ_CUSTOM){
+    const custom = state.subBizCustom.trim();
+    bizContext = custom ? `${state.biz} - ${custom}` : state.biz;
+  } else if(state.subBiz && state.subBiz !== SUB_BIZ_UNSET){
+    bizContext = `${state.biz} - ${state.subBiz}`;
+  }
+  return {
+    biz: bizContext,
+    personaName: state.personaName.trim() || "(이름 미입력)",
+    personaAgeJob: state.personaAgeJob.trim() || "(나이·직업 미입력)",
+    personaDesc: state.personaDesc.trim() || "(핵심 특징·고민 미입력)",
+    personaLabel: state.personaName.trim() || "우리 팀 페르소나"
+  };
+}
+
+function updateProgress(){
+  const doneCount = state.done.filter(Boolean).length;
+  document.getElementById('progressText').textContent =
+    `완료 ${doneCount}/${STEPS.length}`;
+  const pct = Math.round((doneCount / STEPS.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function renderWorksheet(step, idx){
+  if(step.worksheet.type === "triple"){
+    const fieldsHtml = step.worksheet.fields.map((f, fi) => `
+      <div class="triple-field">
+        <label>${f}</label>
+        <input type="text" data-triple="${idx}-${fi}" placeholder="${f}를 한 문장으로 적어보세요">
+      </div>
+    `).join('');
+    return `
+      <div class="worksheet">
+        <div class="worksheet-label">${step.worksheet.label}</div>
+        ${fieldsHtml}
+      </div>
+    `;
+  }
+  return `
+    <div class="worksheet">
+      <div class="worksheet-label">${step.worksheet.label}</div>
+      <textarea data-worksheet="${idx}" placeholder="여기에 팀 의견을 정리해서 적어보세요"></textarea>
+    </div>
+  `;
+}
+
+function render(){
+  const container = document.getElementById('steps');
+  let lastPhase = null;
+  container.innerHTML = STEPS.map((step, i) => {
+    const promptText = step.build(personaFields());
+    const isOpen = state.openIndex === i;
+    const isDone = state.done[i];
+    const phaseHtml = (step.phase !== lastPhase) ? `<div class="phase-tag">${step.phase}</div>` : '';
+    lastPhase = step.phase;
+    return `
+      ${phaseHtml}
+      <div class="step ${isOpen ? 'open' : ''} ${isDone ? 'done' : ''}" data-idx="${i}">
+        <button class="step-header" data-toggle="${i}">
+          <span class="step-plate">${i+1}</span>
+          <span class="step-title-wrap">
+            <span class="step-title">
+              ${step.title}
+              ${step.optional ? '<span class="optional-tag">선택</span>' : ''}
+            </span>
+            <span class="step-desc">${step.desc}</span>
+          </span>
+          <span class="chevron">▾</span>
+        </button>
+        <div class="step-body">
+          <div class="step-body-inner">
+            <div class="prompt-box">${promptText.replace(/</g,'&lt;')}</div>
+            <div class="toolbar">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <button class="copy-btn" data-copy="${i}">프롬프트 복사</button>
+                <span class="copy-note" data-note="${i}">복사됐어요!</span>
+              </div>
+              <label class="done-toggle">
+                <input type="checkbox" data-done="${i}" ${isDone ? 'checked' : ''}>
+                이 단계 완료
+              </label>
+            </div>
+            ${renderWorksheet(step, i)}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.toggle, 10);
+      state.openIndex = (state.openIndex === idx) ? -1 : idx;
+      render();
+    });
+  });
+
+  container.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.copy, 10);
+      const text = STEPS[idx].build(personaFields());
+      try{
+        await navigator.clipboard.writeText(text);
+      }catch(err){
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try{ document.execCommand('copy'); }catch(err2){}
+        document.body.removeChild(ta);
+      }
+      const note = container.querySelector(`[data-note="${idx}"]`);
+      note.classList.add('show');
+      setTimeout(() => note.classList.remove('show'), 1600);
+    });
+  });
+
+  container.querySelectorAll('[data-done]').forEach(cb => {
+    cb.addEventListener('click', (e) => e.stopPropagation());
+    cb.addEventListener('change', (e) => {
+      const idx = parseInt(cb.dataset.done, 10);
+      state.done[idx] = e.target.checked;
+      updateProgress();
+      container.querySelector(`.step[data-idx="${idx}"]`).classList.toggle('done', e.target.checked);
+    });
+  });
+
+  container.querySelectorAll('textarea, input[data-triple]').forEach(el => {
+    el.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  updateProgress();
+}
+
+fillBizOptions();
+render();
+</script>
+</body>
+</html>
