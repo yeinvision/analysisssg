@@ -410,19 +410,24 @@ const BIZ_SUBCATEGORIES = {
     "트레이더스 홀세일클럽",
     "스타필드마켓",
     "노브랜드",
-    "일렉트로마트",
-    "이마트 에브리데이 (SSM)",
-    "이마트24 (편의점)",
-    "SSG.COM",
-    "스타필드"
+    "일렉트로마트"
   ],
   "조선호텔앤리조트": [
-    "웨스틴 조선",
-    "그랜드 조선",
-    "조선 팰리스",
-    "포포인츠 바이 쉐라톤 조선",
-    "레스케이프",
-    "그래비티 조선"
+    { group: "호텔", items: [
+      "웨스틴 조선",
+      "그랜드 조선",
+      "포포인츠 바이 쉐라톤 조선",
+      "레스케이프",
+      "그래비티 조선"
+    ]},
+    { group: "리테일", items: [
+      "격물공부 (럭셔리 플라워 부티크)",
+      "김치",
+      "침구"
+    ]},
+    { group: "레저", items: [
+      "레저"
+    ]}
   ],
   "신세계푸드": [
     "베이커리",
@@ -431,10 +436,9 @@ const BIZ_SUBCATEGORIES = {
     "기타 외식 브랜드 (오슬로·베키아에누보·데블스도어)"
   ],
   "신세계아이앤씨": [
-    "스마트리테일 (AI 계산대·스파로스)",
-    "IT서비스 (SI·시스템 운영)",
-    "클라우드·AI 솔루션",
-    "데이터비즈니스"
+    "IT service (SI, SM)",
+    "Cloud (클라우드 풀스택 서비스)",
+    "Platform service (주문, 결제, 고객관리 솔루션)"
   ]
 };
 const SUB_BIZ_UNSET = "미정";
@@ -535,7 +539,9 @@ let state = {
   personaAgeJob: "",
   personaDesc: "",
   openIndex: 0,
-  done: new Array(STEPS.length).fill(false)
+  done: new Array(STEPS.length).fill(false),
+  worksheetValues: {},
+  tripleValues: {}
 };
 
 const bizSelect = document.getElementById('biz');
@@ -545,6 +551,14 @@ const personaNameInput = document.getElementById('personaName');
 const personaAgeJobInput = document.getElementById('personaAgeJob');
 const personaDescInput = document.getElementById('personaDesc');
 
+function getFlatSubs(biz){
+  const data = BIZ_SUBCATEGORIES[biz] || [];
+  if(data.length && typeof data[0] === 'object'){
+    return data.flatMap(g => g.items);
+  }
+  return data;
+}
+
 function fillBizOptions(){
   bizSelect.innerHTML = BIZ_LIST.map(b => `<option value="${b}">${b}</option>`).join('');
   bizSelect.value = state.biz;
@@ -552,8 +566,16 @@ function fillBizOptions(){
 }
 
 function fillSubBizOptions(){
-  const subs = BIZ_SUBCATEGORIES[state.biz] || [];
-  subBizSelect.innerHTML = subs.map(s => `<option value="${s}">${s}</option>`).join('')
+  const data = BIZ_SUBCATEGORIES[state.biz] || [];
+  let optionsHtml;
+  if(data.length && typeof data[0] === 'object'){
+    optionsHtml = data.map(g =>
+      `<optgroup label="${g.group}">${g.items.map(i => `<option value="${i}">${i}</option>`).join('')}</optgroup>`
+    ).join('');
+  } else {
+    optionsHtml = data.map(s => `<option value="${s}">${s}</option>`).join('');
+  }
+  subBizSelect.innerHTML = optionsHtml
     + `<option value="${SUB_BIZ_UNSET}">${SUB_BIZ_UNSET}</option>`
     + `<option value="${SUB_BIZ_CUSTOM}">직접 입력</option>`;
   subBizSelect.value = state.subBiz;
@@ -562,7 +584,7 @@ function fillSubBizOptions(){
 
 bizSelect.addEventListener('change', () => {
   state.biz = bizSelect.value;
-  state.subBiz = BIZ_SUBCATEGORIES[state.biz][0];
+  state.subBiz = getFlatSubs(state.biz)[0];
   fillSubBizOptions();
   render();
 });
@@ -616,14 +638,26 @@ function updateProgress(){
   document.getElementById('progressFill').style.width = pct + '%';
 }
 
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function renderWorksheet(step, idx){
   if(step.worksheet.type === "triple"){
-    const fieldsHtml = step.worksheet.fields.map((f, fi) => `
+    const fieldsHtml = step.worksheet.fields.map((f, fi) => {
+      const key = `${idx}-${fi}`;
+      const val = state.tripleValues[key] || "";
+      return `
       <div class="triple-field">
         <label>${f}</label>
-        <input type="text" data-triple="${idx}-${fi}" placeholder="${f}를 한 문장으로 적어보세요">
+        <input type="text" data-triple="${key}" value="${escapeHtml(val)}" placeholder="${f}를 한 문장으로 적어보세요">
       </div>
-    `).join('');
+    `;
+    }).join('');
     return `
       <div class="worksheet">
         <div class="worksheet-label">${step.worksheet.label}</div>
@@ -631,10 +665,11 @@ function renderWorksheet(step, idx){
       </div>
     `;
   }
+  const val = state.worksheetValues[idx] || "";
   return `
     <div class="worksheet">
       <div class="worksheet-label">${step.worksheet.label}</div>
-      <textarea data-worksheet="${idx}" placeholder="여기에 팀 의견을 정리해서 적어보세요"></textarea>
+      <textarea data-worksheet="${idx}" placeholder="여기에 팀 의견을 정리해서 적어보세요">${escapeHtml(val)}</textarea>
     </div>
   `;
 }
@@ -725,6 +760,18 @@ function render(){
 
   container.querySelectorAll('textarea, input[data-triple]').forEach(el => {
     el.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  container.querySelectorAll('textarea[data-worksheet]').forEach(el => {
+    el.addEventListener('input', (e) => {
+      state.worksheetValues[el.dataset.worksheet] = e.target.value;
+    });
+  });
+
+  container.querySelectorAll('input[data-triple]').forEach(el => {
+    el.addEventListener('input', (e) => {
+      state.tripleValues[el.dataset.triple] = e.target.value;
+    });
   });
 
   updateProgress();
